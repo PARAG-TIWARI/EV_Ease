@@ -259,9 +259,8 @@ Includes all Premium features plus:
 ## Contributors
 
 ### Parag Tiwari
-
-
-Founder, Author, and Project Lead Developer.
+Full Stack Developer.
+Founder, Author, and Project Lead. 
 
 ---
 

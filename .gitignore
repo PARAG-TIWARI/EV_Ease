@@ -1,0 +1,7 @@
+.idea/
+.vscode/
+.env
+__pycache__/
+
+venv
+direcctory.txt

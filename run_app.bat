@@ -1,0 +1,9 @@
+@echo off
+echo Starting EV AI Agent Service (FastAPI) on port 8000...
+start cmd /k "cd services\ev-ai-agent && python api.py"
+
+echo Starting Backend Server (Flask) on port 5000...
+start cmd /k "cd server && python app.py"
+
+echo Starting React Frontend (Vite) on port 5173...
+cd client && npm run dev

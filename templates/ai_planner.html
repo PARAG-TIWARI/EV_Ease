@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Smart Route Planner - EVEase SaaS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .navbar {
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand span {
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 5%;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header-section h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-section p {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .planner-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/200.svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.5em 1.5em;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px var(--primary);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results styling */
+        #results-container {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-metric {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .result-metric h4 {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-metric .value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border: 1px solid var(--primary);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-top: 1.5rem;
+        }
+
+        .recommendation-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            margin-bottom: 1rem;
+        }
+
+        .explanation {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            border-left: 4px solid var(--primary);
+        }
+
+        @media(max-width: 900px) {
+            .planner-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <i class="fas fa-bolt"></i> EVEase <span>SaaS</span>
+        </a>
+        <a href="/" style="color: var(--text-muted); text-decoration: none; font-weight: 500;">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>Agentic AI Route Planner</h1>
+            <p>Our intelligent agent analyzes your trip, battery, and preferences to recommend the perfect charging stop.</p>
+        </div>
+
+        <div class="planner-grid">
+            <!-- Left: Input Form -->
+            <div class="glass-panel">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem;"><i class="fas fa-route"></i> Trip Details</h3>
+                
+                <form id="ai-planner-form">
+                    <div class="form-group">
+                        <label class="form-label">Starting Location</label>
+                        <input type="text" id="start-loc" class="form-control" placeholder="e.g., Indore, Madhya Pradesh" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Destination</label>
+                        <input type="text" id="dest-loc" class="form-control" placeholder="e.g., Bhopal, Madhya Pradesh" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Current Battery (%)</label>
+                        <input type="number" id="battery" class="form-control" placeholder="0-100" min="1" max="100" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Connector Type</label>
+                        <select id="connector" class="form-control" required>
+                            <option value="CCS2">CCS2</option>
+                            <option value="Type 2">Type 2</option>
+                            <option value="CHAdeMO">CHAdeMO</option>
+                            <option value="GB/T">GB/T</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="btn-primary">
+                        <span>Analyze Route</span>
+                        <div class="loader" id="loader"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right: Results -->
+            <div class="glass-panel" id="results-container">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem;"><i class="fas fa-magic"></i> AI Recommendation</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="result-metric">
+                        <h4>Total Distance</h4>
+                        <div class="value" id="res-distance">--</div>
+                    </div>
+                    <div class="result-metric">
+                        <h4>Travel Time</h4>
+                        <div class="value" id="res-duration">--</div>
+                    </div>
+                </div>
+
+                <div class="recommendation-card" id="charger-details">
+                    <span class="badge">Top Match</span>
+                    <h3 id="res-station-name">Loading...</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1rem;" id="res-station-meta">--</p>
+                    
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <small style="color: var(--text-muted)">Wait Time</small>
+                            <div style="font-weight: bold; color: var(--text-main);" id="res-wait">--</div>
+                        </div>
+                        <div>
+                            <small style="color: var(--text-muted)">Price</small>
+                            <div style="font-weight: bold; color: var(--text-main);" id="res-price">--</div>
+                        </div>
+                    </div>
+
+                    <div class="explanation" id="res-explanation">
+                        --
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-panel" id="waiting-state" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: var(--text-muted);">
+                <i class="fas fa-robot" style="font-size: 4rem; color: rgba(99, 102, 241, 0.5); margin-bottom: 1rem;"></i>
+                <h3>Awaiting Input</h3>
+                <p>Fill out your trip details to let our AI agent orchestrate the best charging plan.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('ai-planner-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submit-btn');
+            const loader = document.getElementById('loader');
+            const btnText = btn.querySelector('span');
+            const resultsContainer = document.getElementById('results-container');
+            const waitingState = document.getElementById('waiting-state');
+            
+            // UI Loading state
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+            
+            const payload = {
+                current_location: document.getElementById('start-loc').value,
+                destination: document.getElementById('dest-loc').value,
+                battery_percentage: parseFloat(document.getElementById('battery').value),
+                connector_type: document.getElementById('connector').value
+            };
+
+            try {
+                // Call the FastAPI service running on port 8000
+                const response = await fetch('http://127.0.0.1:8000/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if(!response.ok) {
+                    throw new Error(data.detail || "Error communicating with AI Agent");
+                }
+
+                // Update UI
+                waitingState.style.display = 'none';
+                resultsContainer.style.display = 'block';
+                
+                document.getElementById('res-distance').innerText = data.route_info.distance.toFixed(1) + ' km';
+                document.getElementById('res-duration').innerText = data.route_info.duration.toFixed(0) + ' min';
+                
+                const best = data.best_charger;
+                if(best) {
+                    document.getElementById('res-station-name').innerText = best.name;
+                    document.getElementById('res-station-meta').innerText = `${best.charger_type} • ${best.power_kw} kW • ${best.available_slots}/${best.total_slots} Slots Free`;
+                    document.getElementById('res-wait').innerText = best.wait_time + ' min';
+                    document.getElementById('res-price').innerText = '₹' + best.price_per_kwh + '/kWh';
+                }
+                
+                document.getElementById('res-explanation').innerText = data.explanation || "The AI recommends this station based on your battery levels, route detour, and current station availability.";
+
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btnText.style.display = 'block';
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

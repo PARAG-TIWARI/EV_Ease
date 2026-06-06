@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play {{ game_name }} | EVEase SaaS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --accent: #f59e0b;
+            --bg-dark: #020617;
+            --bg-card: rgba(15, 23, 42, 0.8);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-image: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05), transparent 50%); padding: 2rem; }
+        
+        .header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .back-btn { color: var(--text-muted); text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s; }
+        .back-btn:hover { color: var(--primary); }
+        
+        .game-container { width: 100%; max-width: 800px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 3rem; text-align: center; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+        .game-title { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; color: var(--primary); }
+        .game-desc { color: var(--text-muted); margin-bottom: 2rem; }
+
+        /* Generic Button */
+        .btn { background: var(--primary); color: #000; border: none; padding: 1rem 2rem; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; margin-top: 1rem; }
+        .btn:hover { background: var(--primary-hover); transform: translateY(-3px); box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* Game 1: Charge Challenge */
+        .battery { width: 150px; height: 300px; border: 5px solid var(--text-main); border-radius: 20px; margin: 0 auto 2rem; position: relative; overflow: hidden; background: rgba(255,255,255,0.05); }
+        .battery::before { content: ''; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 50px; height: 15px; background: var(--text-main); border-radius: 5px 5px 0 0; }
+        .charge-level { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: var(--primary); transition: height 0.1s; display: flex; align-items: flex-start; justify-content: center; overflow: hidden; }
+        .charge-level i { color: rgba(0,0,0,0.2); font-size: 4rem; margin-top: 20px; }
+        #timer { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; color: var(--accent); }
+
+        /* Game 2: EV Quiz */
+        .quiz-question { font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem; }
+        .quiz-options { display: grid; gap: 1rem; }
+        .quiz-option { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 1rem; border-radius: 12px; cursor: pointer; transition: all 0.3s; font-size: 1.1rem; }
+        .quiz-option:hover { background: rgba(16, 185, 129, 0.1); border-color: var(--primary); }
+        .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--primary); color: var(--primary); }
+        .quiz-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444; }
+
+        /* Game 3: Spin Wheel */
+        .wheel-container { position: relative; width: 300px; height: 300px; margin: 0 auto 2rem; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 5px solid var(--text-main); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); background: conic-gradient(
+            #10b981 0deg 60deg, #f59e0b 60deg 120deg, #6366f1 120deg 180deg, 
+            #ef4444 180deg 240deg, #8b5cf6 240deg 300deg, #14b8a6 300deg 360deg
+        ); position: relative; overflow: hidden; }
+        .wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 3rem; color: var(--text-main); z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: var(--text-main); border-radius: 50%; z-index: 5; }
+
+        /* Success Overlay */
+        .success-message { display: none; margin-top: 2rem; padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--primary); border-radius: 12px; color: var(--primary); font-weight: 600; font-size: 1.2rem; animation: fadeInUp 0.5s forwards; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="{{ url_for('rewards_dashboard') }}" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Rewards</a>
+        <div style="font-weight: 600; color: var(--accent);"><i class="fas fa-coins"></i> Win EVE Coins!</div>
+    </div>
+
+    <div class="game-container" id="game-area">
+        <!-- Injected via JS -->
+    </div>
+
+    <script>
+        const gameName = "{{ game_name }}";
+        const gameArea = document.getElementById('game-area');
+
+        // Render Games
+        if (gameName === 'charge_challenge') {
+            gameArea.innerHTML = `
+                <h1 class="game-title">Charge Challenge</h1>
+                <p class="game-desc">Tap the button as fast as you can to charge the EV before 10 seconds run out!</p>
+                <div id="timer">10.0</div>
+                <div class="battery">
+                    <div class="charge-level" id="charge-level"><i class="fas fa-bolt"></i></div>
+                </div>
+                <button class="btn" id="tap-btn" onclick="tapCharge()">Start Charging</button>
+                <div id="success-msg" class="success-message"></div>
+            `;
+            initChargeChallenge();
+        } else if (gameName === 'ev_quiz') {
+            gameArea.innerHTML = `
+                <h1 class="game-title">EV Quiz</h1>
+                <p class="game-desc">Answer 3 questions correctly to win 15 coins!</p>
+                <div id="quiz-container"></div>
+                <div id="success-msg" class="success-message"></div>
+            `;
+            initQuiz();
+        } else if (gameName === 'spin_wheel') {
+            gameArea.innerHTML = `
+                <h1 class="game-title">Daily Spin Wheel</h1>
+                <p class="game-desc">Spin the wheel to win up to 50 EVE Coins!</p>
+                <div class="wheel-container">
+                    <div class="wheel-pointer"><i class="fas fa-caret-down"></i></div>
+                    <div class="wheel" id="wheel"></div>
+                    <div class="wheel-center"></div>
+                </div>
+                <button class="btn" id="spin-btn" onclick="spinWheel()">Spin Wheel</button>
+                <div id="success-msg" class="success-message"></div>
+            `;
+        } else {
+            gameArea.innerHTML = `<h2>Game not found</h2><a href="/rewards-dashboard" class="btn">Go Back</a>`;
+        }
+
+        // --- Common API Call ---
+        function awardCoins(amount, game) {
+            fetch('/api/earn-coins', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ game_name: game, coins: amount })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const msg = document.getElementById('success-msg');
+                msg.style.display = 'block';
+                if(data.status === 'success') {
+                    msg.innerHTML = `<i class="fas fa-check-circle"></i> Success! You won ${amount} coins.`;
+                } else {
+                    msg.innerHTML = `<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> ${data.message}`;
+                    msg.style.borderColor = '#ef4444';
+                    msg.style.color = '#ef4444';
+                    msg.style.background = 'rgba(239, 68, 68, 0.1)';
+                }
+            });
+        }
+
+        // --- Game 1: Charge Challenge ---
+        let chargeClicks = 0;
+        let chargeActive = false;
+        let timeLeft = 10.0;
+        let timerInt;
+        function initChargeChallenge() {
+            chargeClicks = 0;
+            chargeActive = false;
+        }
+        function tapCharge() {
+            const btn = document.getElementById('tap-btn');
+            const level = document.getElementById('charge-level');
+            const timerDisplay = document.getElementById('timer');
+
+            if (!chargeActive && timeLeft === 10.0) {
+                // Start
+                chargeActive = true;
+                btn.innerText = "TAP TAP TAP!";
+                timerInt = setInterval(() => {
+                    timeLeft -= 0.1;
+                    timerDisplay.innerText = timeLeft.toFixed(1);
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInt);
+                        chargeActive = false;
+                        btn.disabled = true;
+                        if (chargeClicks >= 50) {
+                            btn.innerText = "Fully Charged!";
+                            awardCoins(20, 'charge_challenge');
+                        } else {
+                            btn.innerText = "Failed! Try again tomorrow.";
+                        }
+                    }
+                }, 100);
+            }
+
+            if (chargeActive) {
+                chargeClicks++;
+                let height = Math.min((chargeClicks / 50) * 100, 100);
+                level.style.height = height + '%';
+                if (chargeClicks >= 50) {
+                    clearInterval(timerInt);
+                    chargeActive = false;
+                    btn.disabled = true;
+                    btn.innerText = "Fully Charged!";
+                    level.style.background = "#10b981"; // full green
+                    awardCoins(20, 'charge_challenge');
+                }
+            }
+        }
+
+        // --- Game 2: EV Quiz ---
+        const questions = [
+            { q: "What does EV stand for?", options: ["Electric Vehicle", "Energy Value", "Eco Van"], answer: 0 },
+            { q: "Which of these is a benefit of EVs?", options: ["More noise", "Zero tailpipe emissions", "Higher fuel costs"], answer: 1 },
+            { q: "What type of current do fast chargers use?", options: ["Alternating Current (AC)", "Direct Current (DC)", "Static Current"], answer: 1 }
+        ];
+        let currentQ = 0;
+        function initQuiz() {
+            renderQuestion();
+        }
+        function renderQuestion() {
+            const container = document.getElementById('quiz-container');
+            if (currentQ >= questions.length) {
+                container.innerHTML = `<h3>Quiz Completed!</h3>`;
+                awardCoins(15, 'ev_quiz');
+                return;
+            }
+            const q = questions[currentQ];
+            let html = `<div class="quiz-question">Question ${currentQ+1}/3: ${q.q}</div><div class="quiz-options">`;
+            q.options.forEach((opt, idx) => {
+                html += `<div class="quiz-option" onclick="checkAnswer(${idx}, this)">${opt}</div>`;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+        function checkAnswer(idx, el) {
+            const opts = document.querySelectorAll('.quiz-option');
+            opts.forEach(o => o.style.pointerEvents = 'none'); // disable clicks
+            
+            if (idx === questions[currentQ].answer) {
+                el.classList.add('correct');
+                setTimeout(() => {
+                    currentQ++;
+                    renderQuestion();
+                }, 1000);
+            } else {
+                el.classList.add('wrong');
+                opts[questions[currentQ].answer].classList.add('correct');
+                setTimeout(() => {
+                    document.getElementById('quiz-container').innerHTML = `<h3 style="color:#ef4444;">Wrong Answer! Try again tomorrow.</h3>`;
+                }, 1500);
+            }
+        }
+
+        // --- Game 3: Spin Wheel ---
+        function spinWheel() {
+            const btn = document.getElementById('spin-btn');
+            const wheel = document.getElementById('wheel');
+            btn.disabled = true;
+            btn.innerText = "Spinning...";
+
+            // Random rotation between 1080 and 3600 degrees
+            const deg = Math.floor(Math.random() * 2520) + 1080;
+            wheel.style.transform = `rotate(${deg}deg)`;
+
+            setTimeout(() => {
+                const coins = [10, 20, 30, 40, 50][Math.floor(Math.random() * 5)];
+                btn.innerText = `You won ${coins} coins!`;
+                awardCoins(coins, 'spin_wheel');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

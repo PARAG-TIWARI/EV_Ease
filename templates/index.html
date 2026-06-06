@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVEase - Smart EV Charging SaaS Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --secondary: #6366f1;
+            --bg-dark: #0f172a;
+            --bg-darker: #020617;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            padding: 1.5rem 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand span {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border);
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(8px);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-main);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: white !important;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
+            border: none;
+        }
+
+        /* HERO */
+        .hero {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8%;
+            position: relative;
+        }
+
+        .hero-content {
+            flex: 1;
+            max-width: 600px;
+            z-index: 2;
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--primary) 0%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .hero-actions .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-ai {
+            background: rgba(99, 102, 241, 0.1);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-ai:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .hero-graphics {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: flex-end;
+            z-index: 1;
+        }
+
+        .glass-card-mockup {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: perspective(1000px) rotateY(-10deg) rotateX(5deg);
+            transition: transform 0.5s ease;
+        }
+
+        .glass-card-mockup:hover {
+            transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+        }
+
+        .mockup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .station-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .station-info h4 {
+            color: var(--text-main);
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .station-info p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .station-status {
+            text-align: right;
+        }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* FEATURES SECTION */
+        .features {
+            padding: 6rem 8%;
+            background: var(--bg-darker);
+            border-top: 1px solid var(--border);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--bg-darker);
+            padding: 3rem 8%;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        footer h4 {
+            color: var(--text-main);
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        @media(max-width: 900px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 4rem;
+            }
+            .hero h1 {
+                font-size: 3rem;
+            }
+            .hero-actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .hero-graphics {
+                margin-top: 4rem;
+                justify-content: center;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{{ url_for('home') }}" class="navbar-brand">
+            <i class="fas fa-bolt"></i> EVEase <span>SaaS</span>
+        </a>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Platform</a>
+            <a href="{{ url_for('ai_route_planner') }}">AI Planner</a>
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('contact_us') }}">Contact</a>
+            <div style="width: 1px; height: 20px; background: var(--border); margin: 0 10px;"></div>
+            <a href="{{ url_for('login') }}" class="btn-outline">Sign In</a>
+            <a href="{{ url_for('register') }}" class="btn-primary">Get Started</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="ai-badge">
+                <i class="fas fa-sparkles"></i> New: Agentic AI Orchestration
+            </div>
+            <h1>Smart EV Charging <span>Infrastructure</span></h1>
+            <p>The premium SaaS platform for discovering nearby stations, predicting availability, and reserving your charging slots instantly with AI precision.</p>
+            
+            <div class="hero-actions">
+                <a href="{{ url_for('find_your_charger') }}" class="btn btn-main">
+                    Find Chargers <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="{{ url_for('ai_route_planner') }}" class="btn btn-ai">
+                    <i class="fas fa-robot"></i> AI Route Planner
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-graphics">
+            <div class="glass-card-mockup">
+                <div class="mockup-header">
+                    <div>
+                        <h3 style="font-size: 1.1rem; color: #f8fafc;">Live Stations</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Real-time availability</p>
+                    </div>
+                    <i class="fas fa-signal" style="color: var(--primary);"></i>
+                </div>
+
+                <div class="station-item">
+                    <div class="station-info">
+                        <h4>⚡ EV Power Hub</h4>
+                        <p>Fast Charger • CCS2</p>
+                    </div>
+                    <div class="station-status">
+                        <div class="status-badge">Available</div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 4px;">2.1 km</small>
+                    </div>
+                </div>
+
+                <div class="station-item">
+                    <div class="station-info">
+                        <h4>⚡ ChargeX Nexus</h4>
+                        <p>2 Slots Available • Type 2</p>
+                    </div>
+                    <div class="station-status">
+                        <div class="status-badge">Available</div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 4px;">4.5 km</small>
+                    </div>
+                </div>
+
+                <div class="station-item" style="opacity: 0.6;">
+                    <div class="station-info">
+                        <h4>⚡ UltraCharge City</h4>
+                        <p>Currently Full • CHAdeMO</p>
+                    </div>
+                    <div class="station-status">
+                        <div class="status-badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">In Use</div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 4px;">6.8 km</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="section-header">
+            <h2>Enterprise-Grade Features</h2>
+            <p>Everything you need to orchestrate and manage your EV charging experience efficiently.</p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-map-marked-alt"></i></div>
+                <h3>Precision Mapping</h3>
+                <p>Discover high-power charging stations with real-time mapping integration and ultra-accurate distance calculation.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="color: var(--secondary); background: rgba(99, 102, 241, 0.1);"><i class="fas fa-robot"></i></div>
+                <h3>Agentic AI Routing</h3>
+                <p>Let our intelligent agent analyze your battery, traffic, and station loads to orchestrate the perfect charging stop.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                <h3>Instant Reservations</h3>
+                <p>Secure your charging slot before you arrive. Guarantee availability and avoid wait times with 1-click bookings.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <h4><i class="fas fa-bolt" style="color: var(--primary);"></i> EVEase SaaS</h4>
+        <p>&copy; 2026 EVEase AI Platform. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
