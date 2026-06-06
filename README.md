@@ -260,7 +260,8 @@ Includes all Premium features plus:
 
 ### Parag Tiwari
 
-Project Lead & Full Stack Developer
+
+Founder, Author, and Project Lead Developer.
 
 ---
 
