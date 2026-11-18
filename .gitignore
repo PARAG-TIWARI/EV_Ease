@@ -1,7 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Node / Vite
+client/node_modules/
+client/dist/
+
+# Local database
+server/ev_db.sqlite
+
+# IDE and OS
 .idea/
 .vscode/
-.env
-__pycache__/
+.DS_Store
+Thumbs.db
 
-venv
+# Logs
+*.log
+
 direcctory.txt
