@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import CustomSelect from '../components/CustomSelect';
@@ -7,7 +7,7 @@ import { useWallet } from '../context/WalletContext';
 import './ManualSearch.css';
 
 export default function ManualSearch() {
-  const { user } = useAuth();
+  
   const [searchQuery, setSearchQuery] = useState('EV Charging Stations');
   const [connector, setConnector] = useState('All');
   const [power, setPower] = useState('All');
