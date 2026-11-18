@@ -25,7 +25,7 @@ export default function AIPlanner() {
           setSource(`${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
           setIsLocating(false);
         },
-        (error) => {
+        () => {
           alert('Unable to retrieve your location. Please check browser permissions.');
           setIsLocating(false);
         }
