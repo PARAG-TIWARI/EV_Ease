@@ -1,87 +1,110 @@
-# EV Charging Recommendation System
+# EVEase recommendation service
 
-Intelligent EV charging station recommendations based on route, battery level, and charging needs using agentic AI orchestration.
+This folder contains the Python recommendation component used by the EVEase React application. It combines Google Maps route lookup, local charger-record filtering, deterministic ranking and an LLM-generated explanation.
 
-## Features
+## Implemented request flow
 
-- Route intelligence via Google Maps Directions API
-- Smart filtering by connector type (CCS2, Type 2, CHAdeMO, GB/T)
-- Deterministic scoring with 5 positive factors and 4 penalties
-- AI-powered explanations via OpenRouter API
-- Battery-aware safety scoring
-- LangGraph workflow orchestration
+1. The client submits origin, destination, battery percentage and connector type to POST /recommend.
+2. FastAPI validates the request.
+3. The LangGraph workflow asks Google Maps Directions for a driving route.
+4. If the Maps request fails, the current Maps tool returns a fixed demonstration route with mock=true.
+5. ChargerTool loads candidate records from data/chargers.json and filters them by connector type and operational_status.
+6. RankingTool applies fixed, deterministic score factors to the local records.
+7. OpenRouter generates a short explanation for the highest-ranked candidate. A local fallback explanation is returned if the provider request fails.
 
-## Setup
+The numerical recommendation is produced by the Python scoring code. The LLM generates the prose explanation; it does not independently verify the source data.
 
-```bash
+## Important data boundary
+
+The charger tool currently reads a local JSON fixture. Availability, port counts, prices, wait times, ratings and operational status are not retrieved from a live EV charging network. The records include a prefilled distance_from_route_km value; the current implementation does not calculate charger-to-route detours from route geometry.
+
+## Run the FastAPI service
+
+From this directory:
+
+~~~bash
+python -m venv .venv
+
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+
+# macOS / Linux
+source .venv/bin/activate
+
+python -m pip install --upgrade pip
 pip install -r requirements.txt
-cp .env.example .env
-# Add your API keys to .env
+~~~
+
+Copy .env.example to .env and set:
+
+~~~env
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+OPENROUTER_API_KEY=your_openrouter_api_key
+FRONTEND_URLS=http://localhost:5173,http://127.0.0.1:5173
+PORT=8000
+~~~
+
+Run:
+
+~~~bash
+python api.py
+~~~
+
+Endpoints:
+
+- GET /health
+- POST /recommend
+- GET /docs
+
+The service reads browser origins from FRONTEND_URLS. It does not currently require an authenticated user and does not implement per-user quotas. Do not expose it publicly without an access-control and usage-limit layer.
+
+## Optional Streamlit interface
+
+~~~bash
 streamlit run app.py
-```
+~~~
 
-Required environment variables:
-```env
-GOOGLE_MAPS_API_KEY=your_key_here
-OPENROUTER_API_KEY=your_key_here
-```
+This is a separate interface to the same recommendation workflow; it is not the React frontend.
 
-## Usage
+## Scoring approach
 
-1. Enter current location and destination
-2. Select connector type and battery percentage
-3. Click "Get Recommendation"
-4. View best charging station with AI explanation and score breakdown
+RankingTool combines five positive factors:
+- Availability ratio
+- Charging speed
+- Battery safety band
+- Route compatibility based on a stored detour-distance field
+- Station rating
 
-## Scoring Formula
+It subtracts four penalties:
+- Detour distance
+- Stored wait time
+- Stored price per kWh
+- A second detour-related traffic penalty
 
-**Final Score = (Positive Scores) - (Penalties)**
+The coefficients are hand-selected prototype values. They have not been trained or calibrated against actual driver outcomes. The same prefilled detour value contributes to both distance penalties.
 
-Positive Scores:
-- Availability: `available_slots / total_slots`
-- Charging Speed: `min(power_kw / 150, 1.0)`
-- Battery Safety: `1.0` if battery < 15%, else `0.5`
-- Route Compatibility: `1 - min(detour_km / 10, 1)`
-- Reliability: `station_rating / 5`
+## Main files
 
-Penalties:
-- Distance: `detour_km * 0.02`
-- Wait Time: `wait_time * 0.01`
-- Price: `price_per_kwh * 0.001`
-- Traffic Detour: `detour_km * 0.015`
+~~~text
+agents/recommendation_agent.py   # Coordinates route, charger, ranking and LLM tools
+workflow.py                     # LangGraph workflow
+tools/maps_tool.py              # Google Maps Directions and mock fallback
+tools/charger_tool.py            # Local JSON charger filtering
+tools/ranking_tool.py            # Deterministic scoring
+tools/llm_tool.py                # OpenRouter explanation and fallback
+data/chargers.json               # Demonstration charger records
+api.py                           # FastAPI service
+app.py                           # Streamlit interface
+utils/config.py                  # Environment settings
+~~~
 
-## Project Structure
+## Limitations
 
-```
-ev-ai-agent/
-├── app.py                          # Streamlit UI
-├── workflow.py                     # LangGraph workflow
-├── agents/
-│   └── recommendation_agent.py     # Orchestrator agent
-├── tools/
-│   ├── maps_tool.py                # Google Maps
-│   ├── charger_tool.py             # Charger data
-│   ├── ranking_tool.py             # Scoring logic
-│   └── llm_tool.py                 # OpenRouter LLM
-├── data/
-│   └── chargers.json               # Mock charger data
-└── utils/
-    └── config.py                   # Configuration
-```
+- No live EV charging operator data source is integrated.
+- Route failure can switch to fixed mock route data.
+- Charger-to-route distance is a local fixture field, not calculated from route coordinates.
+- No comprehensive automated test suite is included for ranking edge cases or provider failures.
+- The API has no user authentication or per-user rate limiting.
+- Recommendation explanations are generated text and do not verify charger data.
 
-## Tech Stack
-
-Python, Streamlit, LangGraph, LangChain, Google Maps API, OpenRouter API, Pydantic
-
-## Customization
-
-- Add chargers: Edit `data/chargers.json`
-- Modify scoring: Edit `tools/ranking_tool.py`
-- Add tools: Create files in `tools/` directory
-
-## MVP Limitations
-
-- Mock charger data only
-- No real-time availability updates
-- No user authentication
-- Web-only interface
+Use this service as a portfolio demonstration, not as a live charging-availability authority.
