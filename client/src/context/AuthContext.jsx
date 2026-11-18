@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- Provider and hook are intentionally paired in this context module. */
 import { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
