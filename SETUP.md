@@ -128,6 +128,8 @@ The resulting static files are in client/dist. The repository's GitHub Actions w
 
 The configured Firebase project ID is ev-ease. Check the Firebase Console for the current deployed domain, release and hosting status before sharing the public demo URL.
 
+Before a production push to main, configure the GitHub repository Actions variable VITE_API_BASE_URL with the HTTPS origin of the deployed FastAPI service. The production workflow checks this variable before building, so the hosted AI Planner cannot silently fall back to localhost.
+
 ## Troubleshooting
 
 | Symptom | What to check |
