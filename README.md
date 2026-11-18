@@ -1,271 +1,131 @@
-# EVEase — AI-Powered EV Charging Management Platform
+# EVEase — EV Charging Planner Prototype
 
-## Overview
+EVEase is a portfolio project exploring how route information, battery level, connector compatibility and station data can be combined to help an EV driver compare charging options.
 
-EVEase is a full-stack AI-powered EV charging platform designed to help electric vehicle drivers and fleet operators make smarter charging decisions. The platform combines real-time charger discovery, intelligent route planning, charging session monitoring, and AI-driven recommendations into a unified user experience.
+The repository contains a React + Vite frontend, a FastAPI/LangGraph recommendation service and an older Flask/SQLite web prototype. The recommendation service uses Google Maps Directions for route information, local JSON records for charger candidates, a deterministic Python scoring function to rank those records, and OpenRouter to generate a short explanation.
 
-Unlike traditional EV charging applications that simply display nearby charging stations, EVEase analyzes multiple factors such as battery level, destination, charging station availability, estimated waiting times, traffic conditions, and charging speed to recommend the most suitable charging station for each journey.
+> **Project status:** Academic / portfolio prototype. It is not currently connected to a live charging-network availability feed, vehicle telemetry provider, charging hardware, reservation provider or payment gateway. Several navigation, reservation, charging and account screens are demonstrative UI workflows. The README intentionally separates implemented integrations from prototype behaviour.
 
-The platform leverages Agentic AI workflows built with LangGraph and LangChain, enabling intelligent decision-making and personalized charging recommendations.
+## Project links
 
----
+- **GitHub repository:** [PARAG-TIWARI/EV_Ease](https://github.com/PARAG-TIWARI/EV_Ease)
+- **Firebase project configured in the repository:** \`ev-ease\`
+- **Expected default Firebase Hosting address:** [https://ev-ease.web.app](https://ev-ease.web.app) (the repository does not contain a deployment receipt or custom-domain record; verify the URL in Firebase Console before treating it as the current live demo)
+- **AI recommendation API:** configured through the Render blueprint at \`services/ev-ai-agent/render.yaml\`; the actual public service URL is not stored in this repository and must be copied from the Render dashboard.
 
-## Problem Statement
+## What the recommendation service currently does
 
-One of the biggest challenges faced by EV owners is range anxiety—the uncertainty of finding an available charging station when needed.
+1. Accepts origin, destination, current battery percentage and connector type.
+2. Calls Google Maps Directions for route distance, duration and route geometry.
+3. Uses a fixed demonstration route if the Google Maps request fails; the result is marked as mock data.
+4. Reads charger candidates from \`services/ev-ai-agent/data/chargers.json\`.
+5. Filters records by connector compatibility and operational status.
+6. Calculates a deterministic score using the values in the local charger records.
+7. Uses OpenRouter to generate a natural-language explanation for the highest-scoring recommendation.
 
-Current solutions often provide static station listings without considering:
+The charger availability, port counts, wait times, ratings, prices and precomputed detour distances come from a local JSON file. The service does not query an EV charging operator for live port availability or queues. The scoring tool uses the stored \`distance_from_route_km\` value; it does not calculate each station's geographic detour from the Google route geometry.
 
-* Real-time charger availability
-* Traffic conditions
-* Waiting queues
-* Battery constraints
-* Route optimization
-* Charging efficiency
+## Main application areas
 
-EVEase addresses these challenges by providing an intelligent charging assistant that helps users make informed charging decisions throughout their journey.
+- **Charging planner:** origin, destination, battery level and connector input.
+- **AI recommendation:** route lookup, local charger filtering, deterministic ranking and LLM explanation.
+- **Manual station search:** browsing and map-based exploration using the current application data/integrations.
+- **Navigation-style screens:** route and progress presentation; some values and interactions are simulated.
+- **Legacy Flask prototype:** older station search and SQLite booking flows, separate from the React/FastAPI recommendation path.
 
----
+## Technology
 
-## Key Features
+| Area | Technologies |
+| --- | --- |
+| Frontend | React 19, Vite, React Router |
+| Recommendation API | Python, FastAPI, Pydantic, Uvicorn |
+| Workflow | LangGraph, LangChain |
+| Route lookup | Google Maps Directions API |
+| Candidate charger data | Local JSON fixture |
+| Ranking | Deterministic Python scoring |
+| AI explanation | OpenRouter API |
+| Legacy application | Flask, SQLite |
+| Map display | Google Maps embed |
 
-### AI-Powered Charging Recommendations
+## Architecture
 
-An Agentic AI system evaluates multiple charging stations based on:
-
-* Battery percentage
-* Destination distance
-* Connector compatibility
-* Traffic conditions
-* Charging speed
-* Station occupancy
-* Estimated waiting time
-
-The system generates ranked recommendations with transparent scoring metrics.
-
----
-
-### EV Charging Station Discovery
-
-Users can search and explore charging stations through:
-
-* Interactive Google Maps integration
-* Manual location-based search
-* AI-assisted charger recommendations
-
----
-
-### Real-Time Charger Availability
-
-The platform continuously monitors charging station status and displays:
-
-* Available charging slots
-* Occupied chargers
-* Station utilization metrics
-
-This helps users avoid fully occupied stations.
-
----
-
-### Slot Reservation System
-
-Drivers can reserve charging slots directly from the application.
-
-Features include:
-
-* Reservation confirmation
-* Temporary slot holding
-* Reservation status tracking
-
----
-
-### Queue and Wait-Time Estimation
-
-The platform estimates waiting times based on:
-
-* Current charger occupancy
-* Historical station usage patterns
-* Queue length analysis
-
-This information is incorporated into recommendation scores.
-
----
-
-### Navigation and Route Guidance
-
-Integrated Google Maps navigation provides:
-
-* Route visualization
-* Distance tracking
-* ETA calculations
-* Charging stop planning
-
----
-
-### Charging Session Monitoring
-
-Users can monitor charging sessions in real time:
-
-* Battery state of charge
-* Energy delivered (kWh)
-* Charging rate (kW)
-* Session duration
-* Charging cost estimation
-
----
-
-### Subscription and Payment System
-
-The platform supports subscription-based access models:
-
-* Free
-* Pro
-* Enterprise
-
-The architecture is designed for payment gateway integration such as Stripe.
-
----
-
-### Ratings and Reviews
-
-Users can evaluate charging stations through:
-
-* Ratings
-* Reviews
-* Community feedback
-
-This improves recommendation quality and station transparency.
-
----
-
-## System Architecture
-
-```text
-EVEase-ai-platform/
-│
-├── client/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── context/
-│   │   ├── pages/
-│   │   └── assets/
-│
-├── server/
-│   ├── routes/
-│   ├── controllers/
-│   └── models/
-│
+~~~text
+EV_Ease/
+├── client/                    # React + Vite frontend
+│   └── src/
+│       ├── components/
+│       ├── context/
+│       └── pages/
 ├── services/
 │   └── ev-ai-agent/
-│       ├── agents/
-│       ├── tools/
-│       ├── api.py
-│       └── app.py
-│
+│       ├── agents/             # Recommendation workflow
+│       ├── tools/              # Maps, charger fixture, ranking, LLM
+│       ├── data/chargers.json  # Demonstration charger records
+│       ├── api.py              # FastAPI service
+│       ├── workflow.py         # LangGraph workflow
+│       └── render.yaml         # Render service definition
+├── server/                    # Legacy Flask + SQLite prototype
+├── static/                    # Legacy Flask static assets
+├── templates/                 # Legacy Flask templates
+├── .github/workflows/         # Firebase Hosting workflows
 ├── README.md
 ├── SETUP.md
-└── requirements.txt
-```
+└── run_app.bat
+~~~
 
----
+## Run locally
 
-## Technology Stack
+See [SETUP.md](SETUP.md) for prerequisites and step-by-step commands.
 
-### Frontend
+### FastAPI recommendation service
 
-* React 19
-* Vite
-* JavaScript
-* CSS Modules
+The FastAPI API is under \`services/ev-ai-agent/\`. It exposes:
 
-### Backend
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | \`/health\` | Basic API process health |
+| POST | \`/recommend\` | Route-aware charging recommendations |
+| GET | \`/docs\` | Interactive API documentation |
 
-* FastAPI
-* Flask
+The API requires Google Maps and OpenRouter credentials in a server-side \`.env\` file. Do not place these values in the Vite client environment or commit them to Git.
 
-### AI Layer
+### Firebase Hosting
 
-* LangGraph
-* LangChain
-* Agentic Workflows
+The Firebase Hosting configuration is in \`client/firebase.json\`; the Firebase project alias is in \`client/.firebaserc\`. The React build output is \`client/dist\`.
 
-### Maps & Navigation
+GitHub Actions is configured to build the app from the \`client/\` directory and deploy it to Firebase Hosting. See the Firebase workflow files in \`.github/workflows/\`.
 
-* Google Maps API
-* Google Places API
+## Important implementation and security notes
 
-### Future Integrations
+### Recommendation service
+- The recommendation API currently has no user authentication or per-user quota. Do not expose it publicly without an authentication or gateway layer and usage limits for paid provider APIs.
+- Route-provider errors can fall back to a fixed demonstration route.
+- Charger data is local fixture data, not live operator data.
+- The score weights are hand-selected prototype coefficients, not a learned or calibrated model.
+- OpenRouter generates the explanation; it does not verify the local station data.
 
-* Stripe Payments
-* Real Charging Networks
-* Fleet Analytics
-* Predictive Demand Forecasting
+### Legacy Flask application
+The Flask/SQLite prototype is separate from the AI recommendation service and should be treated as local demonstration code only. Source review found:
+- Seeded plaintext demo credentials.
+- A hard-coded fallback session secret.
+- SQL queries assembled with user-provided values in some routes.
+- The admin dashboard route does not consistently enforce the admin role.
+- \`server/setup_db.py\` deletes and recreates the SQLite database when run.
 
----
+Do not expose this Flask application publicly or use real user credentials/data without a dedicated security refactor. The repository also contains a tracked SQLite database file; its binary contents have not been audited in this documentation pass. Check it locally for sensitive records before deciding whether to keep it in a public repository.
 
-## User Roles
+## Current engineering priorities
 
-### Free User
+1. Connect the recommendation workflow to a documented, licensed, genuinely current charger data source.
+2. Calculate station detour distance from coordinates and route geometry.
+3. Display whether route data is live or mock, and show data freshness.
+4. Add authentication and provider usage limits to the recommendation API.
+5. Add unit/integration tests for connector filtering, ranking, provider fallback and malformed inputs.
+6. Replace simulated booking, charging and payment behaviours only when real integrations are available.
+7. Retire or secure the legacy Flask application before any public deployment.
 
-Access to:
+## Author
 
-* Dashboard
-* Station Search
-* Profile Management
-* Subscription Management
+**Parag Tiwari** · B.Tech Computer Science and Engineering student (2027)
 
-### Premium User
-
-Includes all Free features plus:
-
-* AI Charging Recommendations
-* EV AI Assistant
-* Intelligent Route Planning
-* Live Navigation
-
-### Administrator
-
-Includes all Premium features plus:
-
-* System Monitoring
-* Operational Controls
-* Platform Administration
-
----
-
-## AI Recommendation Workflow
-
-1. User enters destination and vehicle information.
-2. The AI agent collects station and route data.
-3. Real-time availability and occupancy are analyzed.
-4. Traffic and detour costs are calculated.
-5. Charging stations are scored and ranked.
-6. The best charging options are presented to the user.
-7. Users can reserve a charger and begin navigation.
-
----
-
-## Future Roadmap
-
-* Dynamic charging price optimization
-* Vehicle-to-Grid (V2G) integration
-* Fleet intelligence dashboard
-* Predictive charger demand forecasting
-* Multi-agent charging orchestration
-* Smart energy management integrations
-
----
-
-## Contributors
-
-### Parag Tiwari
-Full Stack Developer.
-Founder, Author, and Project Lead. 
-
----
-
-## License
-
-This project is developed for academic, research, and demonstration purposes.
-
-Copyright © 2026 EVEase AI Platform
+[GitHub profile](https://github.com/PARAG-TIWARI)
