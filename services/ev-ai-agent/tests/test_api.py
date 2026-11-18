@@ -1,15 +1,14 @@
 """FastAPI recommendation API tests without provider network calls."""
 
-import os
-
-# The workflow imports the API module, which constructs provider clients at
-# import time. Dummy credentials are sufficient because tests mock the workflow.
-os.environ.setdefault("GOOGLE_MAPS_API_KEY", "test-google-maps-key")
-os.environ.setdefault("OPENROUTER_API_KEY", "test-openrouter-key")
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-import api
+# Provider clients are constructed while the workflow modules are imported.
+# Patch both constructors before importing the app so these tests stay offline
+# and never require real Google Maps or OpenRouter credentials.
+with patch("googlemaps.Client"), patch("openai.OpenAI"):
+    import api
 
 
 client = TestClient(api.app)
