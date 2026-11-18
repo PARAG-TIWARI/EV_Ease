@@ -27,6 +27,7 @@ jobs:
       OPENROUTER_API_KEY: test-openrouter-key
       FRONTEND_URLS: http://localhost:5173
       PYTHONUNBUFFERED: "1"
+      PYTHONPATH: ${{ github.workspace }}/services/ev-ai-agent
     steps:
       - uses: actions/checkout@v4
 
