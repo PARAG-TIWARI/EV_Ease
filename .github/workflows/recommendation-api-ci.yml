@@ -1,0 +1,47 @@
+name: EVEase recommendation API checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/ev-ai-agent/**"
+      - ".github/workflows/recommendation-api-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "services/ev-ai-agent/**"
+      - ".github/workflows/recommendation-api-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  api-tests:
+    name: FastAPI unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/ev-ai-agent
+    env:
+      GOOGLE_MAPS_API_KEY: test-google-maps-key
+      OPENROUTER_API_KEY: test-openrouter-key
+      FRONTEND_URLS: http://localhost:5173
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: ${{ github.workspace }}/services/ev-ai-agent
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/ev-ai-agent/requirements-dev.txt
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run API tests
+        run: pytest -q

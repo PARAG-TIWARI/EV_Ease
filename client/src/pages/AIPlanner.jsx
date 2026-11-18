@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import CustomSelect from '../components/CustomSelect';
 import './AIPlanner.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
 
 export default function AIPlanner() {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function AIPlanner() {
           setSource(`${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`);
           setIsLocating(false);
         },
-        (error) => {
+        () => {
           alert('Unable to retrieve your location. Please check browser permissions.');
           setIsLocating(false);
         }
