@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+
 import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [scanning, setScanning] = useState(false);
   const [scanResults, setScanResults] = useState(null);
 
